@@ -14,14 +14,21 @@ SCOPE = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/drive"]
 
 
+import os
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'dummy.json'
+
 @st.cache_resource
 def init_google_sheets():
+    credentials_json = st.secrets["GOOGLE_CREDENTIALS"]
     import json
-    credentials_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, SCOPE)
+    from google.oauth2 import service_account
+    creds = service_account.Credentials.from_service_account_info(
+        json.loads(credentials_json), scopes=SCOPE
+    )
     return gspread.authorize(creds)
 
 client = init_google_sheets()
+
 
 SHEET_NAME = "suivi des opérations"
 
@@ -272,5 +279,6 @@ if st.checkbox("📋 **Historique**"):
 
 st.markdown("---")
 st.markdown("*Suivi Pépinière 🌱 | Multi-Traitement FINAL*")
+
 
 
